@@ -13,14 +13,16 @@ export function terrainAt(seed: number, x: number, y: number): Terrain {
   return noise(seed + 2, x, y, 6) < 0.45 ? "forest" : "grass";
 }
 
-export type Gathering = { item: string; leaves: Terrain };
+// requires: an item the player must hold (not spend) to gather here. Terrain that
+// can be gathered with the right tool can also be walked onto with it.
+export type Gathering = { item: string; leaves: Terrain; requires?: string };
 
 export const GATHERS: Record<Terrain, Gathering | null> = {
   forest: { item: "wood", leaves: "grass" },
   grass: { item: "grass", leaves: "dirt" },
   dirt: null,
   water: null,
-  rock: null,
+  rock: { item: "stone", leaves: "dirt", requires: "pickaxe" },
 };
 
 export function isPassable(terrain: Terrain): boolean {

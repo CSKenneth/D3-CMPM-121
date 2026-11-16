@@ -54,6 +54,12 @@ export class Controller {
     this.next();
   }
 
+  // For the page: a command from a button waits its turn like a key press does.
+  submit(command: Command) {
+    this.pressed = command;
+    this.next();
+  }
+
   private keyUp(event: KeyboardEvent) {
     this.held = this.held.filter((direction) =>
       direction !== ARROWS[event.key]

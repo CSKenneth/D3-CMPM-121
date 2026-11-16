@@ -90,6 +90,8 @@ export class GridView extends Phaser.Scene {
         this.drawCellsAround(event.at);
         return Promise.resolve();
       case "nothing_to_gather":
+      case "crafted":
+      case "craft_failed":
         return Promise.resolve();
       default:
         // A new event type fails to type-check here until it has a presentation.

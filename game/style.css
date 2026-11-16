@@ -81,3 +81,33 @@ body {
     rgb(0 0 0 / 0.5) 100%
   );
 }
+
+#recipes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+#recipes button {
+  width: 100%;
+  padding: 6px 10px;
+  text-align: left;
+  color: inherit;
+  background: #262a31;
+  border: 1px solid #3a3f48;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#recipes button.ready {
+  border-color: #5d9e4a;
+}
+
+#recipes button:focus-visible,
+#mute:focus-visible {
+  outline: 2px solid #f5e6a8;
+  outline-offset: 2px;
+}

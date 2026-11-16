@@ -9,7 +9,8 @@
   </head>
   <body>
     <main id="app">
-      <div id="controls">Arrow keys: move. G: gather.</div>
+      <div
+        id="controls">Arrow keys: move. G: gather. Tab to a recipe and enter to craft or click on recipe to craft.</div>
       <div id="grid"></div>
       <aside id="hud">
         <dl>
@@ -18,6 +19,7 @@
           <dt>Terrain</dt>
           <dd id="terrain"></dd>
         </dl>
+        <ul id="recipes" aria-label="Recipes"></ul>
         <p id="live" aria-live="polite"></p>
         <button id="mute" type="button" aria-pressed="false">Sound: on</button>
       </aside>

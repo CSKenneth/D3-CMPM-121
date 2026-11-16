@@ -1,6 +1,8 @@
 import { assertEquals } from "@std/assert";
-import { apply, cellNow, terrainAt } from "./mod.ts";
+import { apply, cellNow, isPassable, terrainAt } from "./mod.ts";
+import type { GameState } from "./mod.ts";
 import { standingOn } from "./test_helpers.ts";
+import { newGame } from "./mod.ts";
 
 const SEED = 121;
 
@@ -104,4 +106,68 @@ Deno.test("a gather event keeps its cell while state moves on", () => {
     (events[0] as { at: { x: number; y: number } }).at,
     { x, y },
   );
+});
+
+// A state with the player just west of a rock cell, on open ground.
+function besideRock(): GameState {
+  for (let y = 0; y < 200; y++) {
+    for (let x = 1; x < 200; x++) {
+      if (
+        terrainAt(SEED, x, y) === "rock" &&
+        isPassable(terrainAt(SEED, x - 1, y))
+      ) {
+        return { ...newGame(SEED), player: { x: x - 1, y } };
+      }
+    }
+  }
+  throw new Error("Found no rock with open ground to its west.");
+}
+
+Deno.test("rock blocks a player without a pickaxe", () => {
+  const state = besideRock();
+  const before = JSON.parse(JSON.stringify(state));
+
+  const events = apply(state, { type: "move", direction: "east" });
+
+  assertEquals(events[0].type, "blocked");
+  assertEquals(state, before);
+});
+
+Deno.test("a pickaxe lets the player walk onto rock", () => {
+  const state = besideRock();
+  state.inventory.pickaxe = 1;
+  const { x, y } = state.player;
+
+  const events = apply(state, { type: "move", direction: "east" });
+
+  assertEquals(events[0].type, "moved");
+  assertEquals(state.player, { x: x + 1, y });
+});
+
+Deno.test("with a pickaxe, gathering rock yields stone and leaves dirt", () => {
+  const state = standingOn(SEED, "rock");
+  state.inventory.pickaxe = 1;
+  const { x, y } = state.player;
+
+  const events = apply(state, { type: "gather" });
+
+  assertEquals(events, [{
+    type: "gathered",
+    at: { x, y },
+    item: "stone",
+    was: "rock",
+    now: "dirt",
+  }]);
+  assertEquals(state.inventory, { pickaxe: 1, stone: 1 });
+  assertEquals(cellNow(state, x, y), "dirt");
+});
+
+Deno.test("without a pickaxe, rock yields nothing and changes nothing", () => {
+  const state = standingOn(SEED, "rock");
+  const before = JSON.parse(JSON.stringify(state));
+
+  const events = apply(state, { type: "gather" });
+
+  assertEquals(events[0].type, "nothing_to_gather");
+  assertEquals(state, before);
 });

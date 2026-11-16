@@ -20,6 +20,14 @@ function describe(event: GameEvent): string {
       return `gathered ${event.item} at ${event.at.x}, ${event.at.y}`;
     case "nothing_to_gather":
       return `nothing to gather here`;
+    case "crafted":
+      return `crafted ${event.count} ${event.item}`;
+    case "craft_failed": {
+      const needs = Object.entries(event.missing)
+        .map(([item, count]) => `${count} more ${item}`)
+        .join(", ");
+      return `cannot craft ${event.recipe}: need ${needs}`;
+    }
   }
 }
 
@@ -39,7 +47,7 @@ function inventoryElement(): HTMLElement {
 export class Hud {
   private readonly seed: number;
   private readonly changed: Record<string, Terrain>;
-  private readonly inventory: Record<string, number>;
+  private inventory: Record<string, number>;
   private position: { x: number; y: number };
 
   constructor(state: GameState) {
@@ -61,6 +69,11 @@ export class Hud {
       this.changed[cellKey(event.at.x, event.at.y)] = event.now;
       this.inventory[event.item] = (this.inventory[event.item] ?? 0) + 1;
       this.showPosition();
+      this.showInventory();
+    }
+    if (event.type === "crafted") {
+      // The event carries the whole inventory as it stood after the craft.
+      this.inventory = { ...event.inventory };
       this.showInventory();
     }
   }

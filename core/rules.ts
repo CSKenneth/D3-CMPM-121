@@ -2,6 +2,7 @@
 // once, and the events it returns are a record of what happened. Whoever called
 // apply() decides how, or whether, to show them over time.
 
+import { type Recipe, recipeById } from "./recipes.ts";
 import { GATHERS, isPassable, type Terrain, terrainAt } from "./terrain.ts";
 
 export type Cell = { x: number; y: number };
@@ -20,14 +21,24 @@ export type GameState = {
 // Command: https://gameprogrammingpatterns.com/command.html
 export type Command =
   | { type: "move"; direction: Direction }
-  | { type: "gather" };
+  | { type: "gather" }
+  | { type: "craft"; recipe: string };
 
 // Domain Event: https://martinfowler.com/eaaDev/DomainEvent.html
 export type GameEvent =
   | { type: "moved"; from: Cell; to: Cell }
   | { type: "blocked"; at: Cell; toward: Cell; terrain: Terrain }
   | { type: "gathered"; at: Cell; item: string; was: Terrain; now: Terrain }
-  | { type: "nothing_to_gather"; at: Cell; terrain: Terrain };
+  | { type: "nothing_to_gather"; at: Cell; terrain: Terrain }
+  // Both craft events carry copies, never objects that state still holds.
+  | {
+    type: "crafted";
+    recipe: string;
+    item: string;
+    count: number;
+    inventory: Record<string, number>;
+  }
+  | { type: "craft_failed"; recipe: string; missing: Record<string, number> };
 
 const STEPS: Record<Direction, Cell> = {
   north: { x: 0, y: -1 },
@@ -49,6 +60,27 @@ export function cellNow(state: GameState, x: number, y: number): Terrain {
   return state.changed[cellKey(x, y)] ?? terrainAt(state.seed, x, y);
 }
 
+// What the inventory lacks for a recipe, as data: item to how many more are
+// needed. Empty means ready. The rule, the page, and the tests all ask this.
+export function missingFor(
+  state: GameState,
+  recipe: Recipe,
+): Record<string, number> {
+  const missing: Record<string, number> = {};
+  for (const [item, needed] of Object.entries(recipe.inputs)) {
+    const short = needed - (state.inventory[item] ?? 0);
+    if (short > 0) missing[item] = short;
+  }
+  return missing;
+}
+
+// Open terrain, or terrain that the player's tools can get through.
+function canEnter(state: GameState, terrain: Terrain): boolean {
+  if (isPassable(terrain)) return true;
+  const requires = GATHERS[terrain]?.requires;
+  return requires !== undefined && (state.inventory[requires] ?? 0) > 0;
+}
+
 // The single way in. It updates the state it is given and returns the events.
 export function apply(state: GameState, command: Command): GameEvent[] {
   switch (command.type) {
@@ -56,6 +88,8 @@ export function apply(state: GameState, command: Command): GameEvent[] {
       return move(state, command.direction);
     case "gather":
       return gather(state);
+    case "craft":
+      return craft(state, command.recipe);
   }
 }
 
@@ -68,7 +102,7 @@ function move(state: GameState, direction: Direction): GameEvent[] {
   const from = { ...state.player };
   const to = { x: from.x + step.x, y: from.y + step.y };
   const terrain = cellNow(state, to.x, to.y);
-  if (!isPassable(terrain)) {
+  if (!canEnter(state, terrain)) {
     return [{ type: "blocked", at: from, toward: to, terrain }];
   }
   state.player.x = to.x;
@@ -80,8 +114,35 @@ function gather(state: GameState): GameEvent[] {
   const at = { ...state.player };
   const was = cellNow(state, at.x, at.y);
   const row = GATHERS[was];
-  if (!row) return [{ type: "nothing_to_gather", at, terrain: was }];
+  if (!row || (row.requires && !state.inventory[row.requires])) {
+    return [{ type: "nothing_to_gather", at, terrain: was }];
+  }
   state.inventory[row.item] = (state.inventory[row.item] ?? 0) + 1;
   state.changed[cellKey(at.x, at.y)] = row.leaves;
   return [{ type: "gathered", at, item: row.item, was, now: row.leaves }];
+}
+
+function craft(state: GameState, id: string): GameEvent[] {
+  const recipe = recipeById(id);
+  // The page only offers rows of the table, so an unknown id is a bug, not play.
+  if (!recipe) throw new Error(`Unknown recipe: ${id}`);
+  const missing = missingFor(state, recipe);
+  if (Object.keys(missing).length > 0) {
+    return [{ type: "craft_failed", recipe: id, missing }];
+  }
+  for (const [item, needed] of Object.entries(recipe.inputs)) {
+    const left = (state.inventory[item] ?? 0) - needed;
+    // Keep the saved state free of zero entries.
+    if (left > 0) state.inventory[item] = left;
+    else delete state.inventory[item];
+  }
+  const { item, count } = recipe.output;
+  state.inventory[item] = (state.inventory[item] ?? 0) + count;
+  return [{
+    type: "crafted",
+    recipe: id,
+    item,
+    count,
+    inventory: { ...state.inventory },
+  }];
 }
