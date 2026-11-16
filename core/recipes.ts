@@ -16,13 +16,13 @@ export const RECIPES: readonly Recipe[] = [
   {
     id: "plank",
     name: "Plank",
-    inputs: { wood: 2 },
+    inputs: { wood: 1 },
     output: { item: "plank", count: 1 },
   },
   {
     id: "stick",
     name: "Stick",
-    inputs: { plank: 2, wood: 1 },
+    inputs: { plank: 2 },
     output: { item: "stick", count: 1 },
   },
   {
