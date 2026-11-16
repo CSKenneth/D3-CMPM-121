@@ -68,6 +68,7 @@ export class Hud {
       this.showPosition();
     }
     if (event.type === "gathered") {
+      this.changed[cellKey(event.at.x, event.at.y)] = event.now;
       this.inventory[event.item] = (this.inventory[event.item] ?? 0) + 1;
       this.showPosition();
       this.showInventory();
