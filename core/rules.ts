@@ -2,7 +2,7 @@
 // once, and the events it returns are a record of what happened. Whoever called
 // apply() decides how, or whether, to show them over time.
 
-import { type Recipe, recipeById } from "./recipes.ts";
+import { CAPSTONE_RECIPE_ID, type Recipe, recipeById } from "./recipes.ts";
 import { GATHERS, isPassable, type Terrain, terrainAt } from "./terrain.ts";
 
 export type Cell = { x: number; y: number };
@@ -16,6 +16,7 @@ export type GameState = {
   player: Cell;
   inventory: Record<string, number>;
   changed: Record<string, Terrain>;
+  ended: boolean;
 };
 
 // Command: https://gameprogrammingpatterns.com/command.html
@@ -38,7 +39,8 @@ export type GameEvent =
     count: number;
     inventory: Record<string, number>;
   }
-  | { type: "craft_failed"; recipe: string; missing: Record<string, number> };
+  | { type: "craft_failed"; recipe: string; missing: Record<string, number> }
+  | { type: "ended" };
 
 const STEPS: Record<Direction, Cell> = {
   north: { x: 0, y: -1 },
@@ -49,7 +51,13 @@ const STEPS: Record<Direction, Cell> = {
 
 // Singleton, avoided on purpose: tests make as many games as they need. https://gameprogrammingpatterns.com/singleton.html
 export function newGame(seed: number): GameState {
-  return { seed, player: { x: 0, y: 0 }, inventory: {}, changed: {} };
+  return {
+    seed,
+    player: { x: 0, y: 0 },
+    inventory: {},
+    changed: {},
+    ended: false,
+  };
 }
 
 export function cellKey(x: number, y: number): string {
@@ -83,6 +91,8 @@ function canEnter(state: GameState, terrain: Terrain): boolean {
 
 // The single way in. It updates the state it is given and returns the events.
 export function apply(state: GameState, command: Command): GameEvent[] {
+  if (state.ended) return [];
+
   switch (command.type) {
     case "move":
       return move(state, command.direction);
@@ -138,11 +148,18 @@ function craft(state: GameState, id: string): GameEvent[] {
   }
   const { item, count } = recipe.output;
   state.inventory[item] = (state.inventory[item] ?? 0) + count;
-  return [{
+  const craftedEvent: GameEvent = {
     type: "crafted",
     recipe: id,
     item,
     count,
     inventory: { ...state.inventory },
-  }];
+  };
+
+  if (id === CAPSTONE_RECIPE_ID) {
+    state.ended = true;
+    return [craftedEvent, { type: "ended" }];
+  }
+
+  return [craftedEvent];
 }

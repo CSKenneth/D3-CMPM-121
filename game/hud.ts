@@ -28,6 +28,8 @@ function describe(event: GameEvent): string {
         .join(", ");
       return `cannot craft ${event.recipe}: need ${needs}`;
     }
+    case "ended":
+      return `The Nuke has been launched. The world is destroyed.`;
   }
 }
 
@@ -75,6 +77,9 @@ export class Hud {
       // The event carries the whole inventory as it stood after the craft.
       this.inventory = { ...event.inventory };
       this.showInventory();
+    }
+    if (event.type === "ended") {
+      element("ending-banner").hidden = false;
     }
   }
 

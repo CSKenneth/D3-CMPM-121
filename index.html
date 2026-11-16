@@ -9,6 +9,10 @@
   </head>
   <body>
     <main id="app">
+      <p id="goal">
+        Your Mission: Gather resources to craft a nuke and launch it to destroy the world.
+        Gather grass, wood, and stone to compress into dense counterparts, then combine to craft a nuke.
+      </p>
       <div
         id="controls">Arrow keys: move. G: gather. Tab to a recipe and enter to craft or click on recipe to craft.</div>
       <div id="grid"></div>
@@ -23,6 +27,10 @@
         <p id="live" aria-live="polite"></p>
         <button id="mute" type="button" aria-pressed="false">Sound: on</button>
       </aside>
+      <div id="ending-banner" hidden>
+        <h2>MISSION COMPLETE</h2>
+        <p>Nuke launched successfully! The world is doomed!</p>
+      </div>
     </main>
     <script type="module" src="/game/main.ts"></script>
   </body>
