@@ -6,6 +6,35 @@ We created a grathering a crafting game with an end goal. Users are able to expl
 
 https://cskenneth.github.io/D3-CMPM-121/
 
+# How to play game
+
+1. Launch game.
+2. Press start.
+3. Use arrow keys to move and G to gather.
+4. Use tab and enter or mouse button to craft items using repice browser on right side of screen.
+5. Finally, have fun explore and progress through game.
+
+# How to run game locally
+
+1. Find game on github
+2. Launch game through playable link in README
+
+# How to add a recipe
+
+1. In order to add a recipe to our game you must first go to the file recipes.ts
+2. After going to recipes.ts you must then figure out what recipe you want to be added to the game
+3. Add another section in the RECIPES class following the format of the previous recipes
+   Format:
+
+```typescript
+{
+  id: "ID Here",
+  name: "Name Here",
+  inputs: { "Ingredient 1": 2, "Ingredient 2": 3, },
+  output: { item: "ID Here", count: 1 },
+},
+```
+
 # D3 starter
 
 A walking skeleton: one thin slice of a game that works from end to end. The player moves gridwise over a big seeded world, with a game core that knows nothing about Phaser and a Phaser client that presents what the core reports. Assignment instructions are on Canvas.
