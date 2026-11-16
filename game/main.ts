@@ -20,6 +20,23 @@ const sounds = new Sounds(
 );
 const grid = await startGridView(document.getElementById("grid")!, state);
 const presenter = new Presenter([grid, hud, sounds]);
+
+// The intro screen. Nothing listens for keys until Start is pressed, so the
+// player cannot move behind it. Pressing Start is also the click that browsers
+// need before they allow sound.
+const start = document.getElementById("start") as HTMLButtonElement;
+start.focus();
+await new Promise<void>((resolve) =>
+  start.addEventListener("click", () => resolve(), { once: true })
+);
+document.getElementById("intro")!.hidden = true;
+document.getElementById("app")!.inert = false;
+
+// The ending screen offers a fresh game: a reload keeps the same ?seed.
+document.getElementById("restart")!.addEventListener(
+  "click",
+  () => location.reload(),
+);
 const controller = new Controller(state, presenter);
 const recipeBook = new RecipeBook(
   document.getElementById("recipes")!,

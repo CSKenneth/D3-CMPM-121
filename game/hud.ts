@@ -79,7 +79,11 @@ export class Hud {
       this.showInventory();
     }
     if (event.type === "ended") {
+      // Show the ending screen, shut the page behind it, and put focus on its
+      // button so a keyboard player can restart.
       element("ending-banner").hidden = false;
+      (element("app") as HTMLElement).inert = true;
+      element("restart").focus();
     }
   }
 

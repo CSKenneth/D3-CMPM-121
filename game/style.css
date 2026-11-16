@@ -122,17 +122,54 @@ body {
   line-height: 1.5;
 }
 
-#ending-banner {
-  flex-basis: 100%;
+/* Full-page screens for the start and the end. */
+.screen {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
   padding: 24px;
-  background: #8f2929;
-  color: #ffffff;
-  border: 2px solid #3a3f48;
-  border-radius: 8px;
   text-align: center;
+  background: #14161a;
 }
 
-#ending-banner h2 {
-  margin-top: 0;
-  font-size: 28px;
+/* display: flex above would otherwise beat the hidden attribute. */
+.screen[hidden] {
+  display: none;
+}
+
+#ending-banner {
+  background: #8f2929;
+  color: #ffffff;
+}
+
+.screen h1,
+.screen h2 {
+  margin: 0;
+  font-size: 32px;
+}
+
+.screen p {
+  max-width: 40em;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.screen button {
+  padding: 10px 24px;
+  font-size: 16px;
+  color: inherit;
+  background: #262a31;
+  border: 2px solid #5d9e4a;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.screen button:focus-visible {
+  outline: 2px solid #f5e6a8;
+  outline-offset: 2px;
 }

@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="/game/style.css" />
   </head>
   <body>
-    <main id="app">
+    <main id="app" inert>
       <p id="goal">
         Your Mission: Gather resources to craft a nuke and launch it to destroy the world.
         Gather grass, wood, and stone to compress into dense counterparts, then combine to craft a nuke.
@@ -27,11 +27,34 @@
         <p id="live" aria-live="polite"></p>
         <button id="mute" type="button" aria-pressed="false">Sound: on</button>
       </aside>
-      <div id="ending-banner" hidden>
-        <h2>MISSION COMPLETE</h2>
-        <p>Nuke launched successfully! The world is doomed!</p>
-      </div>
     </main>
+    <div
+      id="intro"
+      class="screen"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="intro-title"
+    >
+      <h1 id="intro-title">Mission Briefing</h1>
+      <p>
+        Gather grass, wood, and stone. Compress them into dense materials, then
+        combine them to craft a nuke and launch it.
+      </p>
+      <p>Arrow keys move. G gathers. Tab to a recipe and press Enter to craft.</p>
+      <button id="start" type="button">Start</button>
+    </div>
+    <div
+      id="ending-banner"
+      class="screen"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="ending-title"
+      hidden
+    >
+      <h2 id="ending-title">MISSION COMPLETE</h2>
+      <p>Nuke launched successfully! The world is doomed!</p>
+      <button id="restart" type="button">Play again</button>
+    </div>
     <script type="module" src="/game/main.ts"></script>
   </body>
 </html>

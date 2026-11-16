@@ -1,3 +1,11 @@
+# What we did
+
+We created a grathering a crafting game with an end goal. Users are able to explore the world, gather resources, and end the world.
+
+# Playable Link
+
+https://cskenneth.github.io/D3-CMPM-121/
+
 # D3 starter
 
 A walking skeleton: one thin slice of a game that works from end to end. The player moves gridwise over a big seeded world, with a game core that knows nothing about Phaser and a Phaser client that presents what the core reports. Assignment instructions are on Canvas.
